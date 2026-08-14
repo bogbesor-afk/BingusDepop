@@ -52,7 +52,7 @@ Benjamin has zero coding or technical experience. This project is both a product
 
 ## GitHub Repository
 
-**Remote URL:** not yet created — needs to be set up on github.com, then connected here.
+**Remote URL:** `https://github.com/bogbesor-afk/bingusbread.git`
 **Branch:** `main`
 
 ---
