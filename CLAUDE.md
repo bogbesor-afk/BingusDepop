@@ -157,13 +157,14 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 ## Build Progress
 
-**Current phase:** Project scaffolded (Next.js + TypeScript + Tailwind). No database, auth, or GitHub repo set up yet.
+**Current phase:** Project scaffolded, GitHub repo live (private, `bogbesor-afk/bingusbread`), Supabase project created (`bingusbread`, ref `fpixriowfqdhthjthucp`, region us-east-2) and linked. Schema (households, household_members, categories, transactions) is created and applied to the live database via `supabase/migrations/20260814000000_init_schema.sql`. No UI built yet — no pages read or write real data.
+
+**Known gap (2026-08-14, must fix before deploying publicly):** Row Level Security (RLS) is NOT yet enabled on any table. Right now anyone with the anon key (which is public/embedded in the deployed app) could read or write all households' data. This is safe only because the app isn't deployed anywhere yet and has no real UI. RLS policies (scoped to household membership) must be added as part of building the auth/invite flow — do not deploy to Vercel before this is done.
 
 **Next steps:**
-1. Create GitHub repo and connect this project to it
-2. Create Supabase project and connect `.env.local`
-3. Build household creation + invite flow (Supabase Auth)
-4. Build transaction entry form and list
-5. Build dashboard with totals and category breakdown
+1. Build household creation + invite-by-email flow (Supabase Auth)
+2. Add RLS policies scoped to household membership (see gap above)
+3. Build transaction entry form and list
+4. Build dashboard with totals and category breakdown
 
 **12-Week Plan:** not yet drafted — will build incrementally, one feature per session, same style as Tryout Scout.
