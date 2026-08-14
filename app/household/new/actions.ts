@@ -18,51 +18,47 @@ export async function createHousehold(formData: FormData) {
     redirect("/login");
   }
 
-  const { data: household, error: householdError } = await supabase
-    .from("households")
-    .insert({ name: householdName })
-    .select()
-    .single();
+  // Generated up front (rather than reading it back after insert) because
+  // right after creation the user isn't an active member yet, so the
+  // "view your household" policy would block reading the new row back.
+  const householdId = crypto.randomUUID();
 
-  if (householdError || !household) {
+  const { error: householdError } = await supabase
+    .from("households")
+    .insert({ id: householdId, name: householdName });
+
+  if (householdError) {
     redirect(
-      `/household/new?error=${encodeURIComponent(
-        householdError?.message ?? "Could not create household"
-      )}`
+      `/household/new?error=${encodeURIComponent(householdError.message)}`
     );
   }
 
-  const members: {
-    household_id: string;
-    user_id: string | null;
-    invited_email: string;
-    status: string;
-  }[] = [
-    {
-      household_id: household.id,
-      user_id: user.id,
-      invited_email: user.email!,
-      status: "active",
-    },
-  ];
+  const { error: selfError } = await supabase.from("household_members").insert({
+    household_id: householdId,
+    user_id: user.id,
+    invited_email: user.email!,
+    status: "active",
+  });
+
+  if (selfError) {
+    redirect(`/household/new?error=${encodeURIComponent(selfError.message)}`);
+  }
 
   if (partnerEmail && partnerEmail !== user.email?.toLowerCase()) {
-    members.push({
-      household_id: household.id,
-      user_id: null,
-      invited_email: partnerEmail,
-      status: "invited",
-    });
-  }
+    const { error: partnerError } = await supabase
+      .from("household_members")
+      .insert({
+        household_id: householdId,
+        user_id: null,
+        invited_email: partnerEmail,
+        status: "invited",
+      });
 
-  const { error: membersError } = await supabase
-    .from("household_members")
-    .insert(members);
-
-  if (membersError) {
-    redirect(
-      `/household/new?error=${encodeURIComponent(membersError.message)}`
-    );
+    if (partnerError) {
+      redirect(
+        `/household/new?error=${encodeURIComponent(partnerError.message)}`
+      );
+    }
   }
 
   redirect("/");

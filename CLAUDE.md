@@ -161,13 +161,14 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 Auth is built and verified end-to-end in the browser: sign up, email confirmation (Supabase's built-in flow), sign in, sign out, household creation, and the auto-link-by-email mechanic (a user who signs up with an email that's already sitting in `household_members` as `status: 'invited'` gets automatically linked to that household on their first login — no admin invite email needed). Session handling uses `@supabase/ssr` (`lib/supabase/client.ts`, `server.ts`, `middleware.ts`, root `middleware.ts`). Pages: `app/login`, `app/household/new`, `app/auth/callback`, `app/page.tsx` (dashboard placeholder + redirect logic).
 
-**Known gap (2026-08-14, must fix before deploying publicly):** Row Level Security (RLS) is NOT yet enabled on any table. Right now anyone with the anon key (public/embedded in the deployed app) could read or write all households' data via the client directly. Safe for now only because nothing is deployed. Must add RLS policies scoped to household membership before ever deploying to Vercel.
+**Security gap closed (2026-08-14):** Row Level Security (RLS) is now enabled on all four tables via `supabase/migrations/20260814020000_add_rls_policies.sql`, scoped to household membership through a `security definer` helper function `is_household_member(household_id)` (avoids infinite-recursion issues that come from a table's RLS policy querying itself). Verified directly: an anonymous request to the REST API now returns `[]` for households/household_members even when real rows exist, and a signed-in user can only see/modify data for households they belong to.
+
+One RLS-driven fix worth knowing about: `app/household/new/actions.ts` used to insert a household then immediately `.select()` it back — but right after creation the user isn't an active member yet, so the "view your household" policy blocked reading the row back (chicken-and-egg). Fixed by generating the household's UUID client-side (`crypto.randomUUID()`) and inserting with that ID directly, so no read-back is needed. The two `household_members` inserts (self, then optionally partner) also had to become sequential rather than one batched insert, since the partner row's policy check depends on the self row already existing.
 
 **Also noted:** Supabase's free-tier shared SMTP has a low rate limit on outgoing auth emails (hit "email rate limit exceeded" during testing after a couple of signups in quick succession). Not a bug — just something to be aware of if testing signup repeatedly. A custom SMTP provider would remove this limit if it becomes an issue for real usage.
 
 **Next steps:**
-1. Add RLS policies scoped to household membership (see gap above) — should happen before building more UI that touches real household data
-2. Build transaction entry form and list
-3. Build dashboard with totals and category breakdown
+1. Build transaction entry form and list
+2. Build dashboard with totals and category breakdown
 
 **12-Week Plan:** not yet drafted — will build incrementally, one feature per session, same style as Tryout Scout.
