@@ -87,28 +87,32 @@ export default async function TransactionsPage() {
         ) : (
           <ul className="divide-y divide-neutral-800 rounded-md border border-neutral-800 overflow-hidden">
             {rows.map((t) => (
-              <li
-                key={t.id}
-                className="flex items-center justify-between px-3 py-3 bg-neutral-900"
-              >
-                <div>
-                  <p className="text-sm">
-                    {(t.categories as unknown as { name: string } | null)
-                      ?.name ?? "Uncategorized"}
-                  </p>
-                  <p className="text-xs text-neutral-400">
-                    {formatDate(t.date)}
-                    {t.description ? ` · ${t.description}` : ""}
-                  </p>
-                </div>
-                <p
-                  className={`text-sm font-medium ${
-                    t.type === "income" ? "text-emerald-400" : "text-red-400"
-                  }`}
+              <li key={t.id} className="bg-neutral-900">
+                <Link
+                  href={`/transactions/${t.id}/edit`}
+                  className="flex items-center justify-between px-3 py-3 hover:bg-neutral-800"
                 >
-                  {t.type === "income" ? "+" : "-"}
-                  {currency.format(Number(t.amount))}
-                </p>
+                  <div>
+                    <p className="text-sm">
+                      {(t.categories as unknown as { name: string } | null)
+                        ?.name ?? "Uncategorized"}
+                    </p>
+                    <p className="text-xs text-neutral-400">
+                      {formatDate(t.date)}
+                      {t.description ? ` · ${t.description}` : ""}
+                    </p>
+                  </div>
+                  <p
+                    className={`text-sm font-medium ${
+                      t.type === "income"
+                        ? "text-emerald-400"
+                        : "text-red-400"
+                    }`}
+                  >
+                    {t.type === "income" ? "+" : "-"}
+                    {currency.format(Number(t.amount))}
+                  </p>
+                </Link>
               </li>
             ))}
           </ul>

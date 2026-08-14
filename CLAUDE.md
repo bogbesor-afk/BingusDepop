@@ -173,9 +173,17 @@ Two real bugs were caught and fixed during browser verification (not just typos 
 - **Category always showed "Uncategorized":** the Supabase join `categories(name)` returns a single *object* at runtime for a belongs-to relationship, but TypeScript's default inference (without generated `Database` types) guesses it's an *array*. Code was doing `t.categories?.[0]?.name`, which is always undefined on an object. Fixed by casting to the correct object shape instead. Worth remembering for any future embedded-relation query in this codebase.
 - **Dates displayed one day earlier than entered:** `new Date("2026-08-14")` parses date-only strings as UTC midnight; `.toLocaleDateString()` then renders in the browser's local timezone, which rolls back a day in any US timezone. Fixed with a `formatDate()` helper that builds the `Date` from local year/month/day components instead of parsing the string directly. Any future date-only field rendered from the database should use this same pattern, not `new Date(dateString)` directly.
 
-**Next steps:**
-1. Build dashboard with totals and category breakdown (richer version of what `/transactions` already shows)
-2. Category management UI (add/edit/delete categories per household)
-3. Before deploying: revisit Supabase email rate limits / custom SMTP if real usage needs more signups than the free tier allows
+**Full MVP loop completed and verified in the browser (2026-08-14):**
+- Transaction edit/delete: `app/transactions/[id]/edit` (page + actions.ts). Delete has a client-side `confirm()` guard (`DeleteButton.tsx`) — verified in testing that a cancelled confirm correctly blocks the delete, and an accepted one correctly removes the row.
+- Category management: `app/categories` (page + actions.ts) — add/delete categories per household, grouped by expense/income. Deleting a category is safe: `transactions.category_id` is `on delete set null`, so existing transactions just become "Uncategorized" rather than breaking.
+- Real dashboard: `app/page.tsx` now shows the current calendar month's income/expenses/net, a spending-by-category breakdown with percentage bars, and the 5 most recent transactions — not just a placeholder. Quick links to Add transaction / All transactions / Categories.
 
-**12-Week Plan:** not yet drafted — will build incrementally, one feature per session, same style as Tryout Scout.
+Every feature above was verified by actually driving the app in a browser (sign up, confirm via admin API since Supabase's test-email rate limit is low, create household, add/edit/delete transactions, add/delete categories, check dashboard math), not just type-checked. Test data was deleted from Supabase after each verification pass.
+
+**Next steps:**
+1. Deploy to Vercel so the app is actually usable on a phone (the whole point of "mobile web app") — in progress
+2. Before/soon after deploying: revisit Supabase email rate limits / custom SMTP if real usage needs more signups than the free tier allows
+
+**Deliberately out of scope for now** (per the "Key Product Decisions" above — revisit only if Benjamin asks): bank account connection, budgeting/goals/alerts, CSV export, multi-currency, more than 2 people per household.
+
+**12-Week Plan:** not drafted as a formal week-by-week doc — built incrementally, one feature per session, same style as Tryout Scout.
