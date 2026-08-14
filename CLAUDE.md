@@ -167,8 +167,15 @@ One RLS-driven fix worth knowing about: `app/household/new/actions.ts` used to i
 
 **Also noted:** Supabase's free-tier shared SMTP has a low rate limit on outgoing auth emails (hit "email rate limit exceeded" during testing after a couple of signups in quick succession). Not a bug — just something to be aware of if testing signup repeatedly. A custom SMTP provider would remove this limit if it becomes an issue for real usage.
 
+**Transaction entry and list built (2026-08-14):** `app/transactions/new` (form) and `app/transactions` (list with income/expense/net totals) are live, backed by a shared `lib/household.ts` helper (`requireHousehold()`) that any page needing "the signed-in user's active household" can reuse. Household creation now also seeds 10 default categories (8 expense, 2 income) so the transaction form is immediately usable — there's no category-management UI yet, so categories can only be added/edited directly in Supabase for now.
+
+Two real bugs were caught and fixed during browser verification (not just typos — worth remembering the underlying lessons):
+- **Category always showed "Uncategorized":** the Supabase join `categories(name)` returns a single *object* at runtime for a belongs-to relationship, but TypeScript's default inference (without generated `Database` types) guesses it's an *array*. Code was doing `t.categories?.[0]?.name`, which is always undefined on an object. Fixed by casting to the correct object shape instead. Worth remembering for any future embedded-relation query in this codebase.
+- **Dates displayed one day earlier than entered:** `new Date("2026-08-14")` parses date-only strings as UTC midnight; `.toLocaleDateString()` then renders in the browser's local timezone, which rolls back a day in any US timezone. Fixed with a `formatDate()` helper that builds the `Date` from local year/month/day components instead of parsing the string directly. Any future date-only field rendered from the database should use this same pattern, not `new Date(dateString)` directly.
+
 **Next steps:**
-1. Build transaction entry form and list
-2. Build dashboard with totals and category breakdown
+1. Build dashboard with totals and category breakdown (richer version of what `/transactions` already shows)
+2. Category management UI (add/edit/delete categories per household)
+3. Before deploying: revisit Supabase email rate limits / custom SMTP if real usage needs more signups than the free tier allows
 
 **12-Week Plan:** not yet drafted — will build incrementally, one feature per session, same style as Tryout Scout.

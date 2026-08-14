@@ -61,5 +61,25 @@ export async function createHousehold(formData: FormData) {
     }
   }
 
+  const defaultCategories = [
+    { name: "Groceries", type: "expense" },
+    { name: "Rent/Mortgage", type: "expense" },
+    { name: "Utilities", type: "expense" },
+    { name: "Transportation", type: "expense" },
+    { name: "Dining Out", type: "expense" },
+    { name: "Entertainment", type: "expense" },
+    { name: "Healthcare", type: "expense" },
+    { name: "Other Expense", type: "expense" },
+    { name: "Salary", type: "income" },
+    { name: "Other Income", type: "income" },
+  ];
+
+  await supabase.from("categories").insert(
+    defaultCategories.map((category) => ({
+      household_id: householdId,
+      ...category,
+    }))
+  );
+
   redirect("/");
 }

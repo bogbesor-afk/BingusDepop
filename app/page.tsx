@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/auth/actions";
@@ -66,9 +67,21 @@ export default async function Home() {
             </button>
           </form>
         </div>
-        <p className="text-neutral-400 text-sm">
-          Signed in as {user.email}. Transaction tracking is coming next.
-        </p>
+        <p className="text-neutral-400 text-sm">Signed in as {user.email}.</p>
+        <div className="flex gap-3">
+          <Link
+            href="/transactions/new"
+            className="flex-1 text-center rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium py-2"
+          >
+            Add transaction
+          </Link>
+          <Link
+            href="/transactions"
+            className="flex-1 text-center rounded-md bg-neutral-800 hover:bg-neutral-700 text-white text-sm font-medium py-2"
+          >
+            View transactions
+          </Link>
+        </div>
       </div>
     </main>
   );
