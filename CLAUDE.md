@@ -157,14 +157,17 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 ## Build Progress
 
-**Current phase:** Project scaffolded, GitHub repo live (private, `bogbesor-afk/bingusbread`), Supabase project created (`bingusbread`, ref `fpixriowfqdhthjthucp`, region us-east-2) and linked. Schema (households, household_members, categories, transactions) is created and applied to the live database via `supabase/migrations/20260814000000_init_schema.sql`. No UI built yet — no pages read or write real data.
+**Current phase:** Project scaffolded, GitHub repo live (private, `bogbesor-afk/bingusbread`), Supabase project created (`bingusbread`, ref `fpixriowfqdhthjthucp`, region us-east-2) and linked. Schema (households, household_members, categories, transactions) is applied via `supabase/migrations/20260814000000_init_schema.sql`.
 
-**Known gap (2026-08-14, must fix before deploying publicly):** Row Level Security (RLS) is NOT yet enabled on any table. Right now anyone with the anon key (which is public/embedded in the deployed app) could read or write all households' data. This is safe only because the app isn't deployed anywhere yet and has no real UI. RLS policies (scoped to household membership) must be added as part of building the auth/invite flow — do not deploy to Vercel before this is done.
+Auth is built and verified end-to-end in the browser: sign up, email confirmation (Supabase's built-in flow), sign in, sign out, household creation, and the auto-link-by-email mechanic (a user who signs up with an email that's already sitting in `household_members` as `status: 'invited'` gets automatically linked to that household on their first login — no admin invite email needed). Session handling uses `@supabase/ssr` (`lib/supabase/client.ts`, `server.ts`, `middleware.ts`, root `middleware.ts`). Pages: `app/login`, `app/household/new`, `app/auth/callback`, `app/page.tsx` (dashboard placeholder + redirect logic).
+
+**Known gap (2026-08-14, must fix before deploying publicly):** Row Level Security (RLS) is NOT yet enabled on any table. Right now anyone with the anon key (public/embedded in the deployed app) could read or write all households' data via the client directly. Safe for now only because nothing is deployed. Must add RLS policies scoped to household membership before ever deploying to Vercel.
+
+**Also noted:** Supabase's free-tier shared SMTP has a low rate limit on outgoing auth emails (hit "email rate limit exceeded" during testing after a couple of signups in quick succession). Not a bug — just something to be aware of if testing signup repeatedly. A custom SMTP provider would remove this limit if it becomes an issue for real usage.
 
 **Next steps:**
-1. Build household creation + invite-by-email flow (Supabase Auth)
-2. Add RLS policies scoped to household membership (see gap above)
-3. Build transaction entry form and list
-4. Build dashboard with totals and category breakdown
+1. Add RLS policies scoped to household membership (see gap above) — should happen before building more UI that touches real household data
+2. Build transaction entry form and list
+3. Build dashboard with totals and category breakdown
 
 **12-Week Plan:** not yet drafted — will build incrementally, one feature per session, same style as Tryout Scout.
