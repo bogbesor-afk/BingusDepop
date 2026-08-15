@@ -115,32 +115,54 @@ These were decided during planning on 2026-08-14 and should not be revisited unl
 
 ---
 
-## App Page Structure (planned)
+## App Page Structure (as built)
 
 ```
 app/
-  page.tsx                        → Homepage / dashboard (balance, recent transactions)
+  page.tsx                          → Dashboard: this month's totals, spending by category, recent activity
+  login/
+    page.tsx, actions.ts            → Sign in / sign up
+  auth/
+    actions.ts                      → Sign out
+    callback/route.ts               → Handles email confirmation redirect
   household/
-    new/page.tsx                  → Create a household + invite second person
+    new/page.tsx, actions.ts        → Create a household + invite partner by email
   transactions/
-    page.tsx                      → List of transactions (search + filter by category)
-    new/page.tsx                  → Add a transaction
+    page.tsx                        → Full list with income/expense/net totals
+    new/page.tsx, actions.ts        → Add a transaction
+    [id]/edit/page.tsx, actions.ts, DeleteButton.tsx → Edit or delete a transaction
   categories/
-    page.tsx                      → Manage categories
+    page.tsx, actions.ts, DeleteCategoryButton.tsx   → Add/delete categories
+middleware.ts                       → Refreshes the Supabase session cookie on every request
 lib/
-  supabase.ts                     → Supabase client used for all database calls
+  household.ts                      → requireHousehold() — shared "get the signed-in user's household" helper
+  supabase/
+    client.ts                       → Browser Supabase client
+    server.ts                       → Server component / server action Supabase client
+    middleware.ts                   → Session-refresh helper used by root middleware.ts
 ```
 
 ---
 
 ## Environment Variables
 
-Live in `.env.local` in the project root. Never committed to GitHub.
+Live in `.env.local` locally (never committed to GitHub) and as encrypted Production env vars on Vercel.
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_SITE_URL=your_deployed_url   # used for auth email confirmation redirects; defaults to localhost:3212 if unset
 ```
+
+---
+
+## Deployment
+
+- **Live URL:** https://bingusbread.vercel.app
+- **Vercel project:** `benjyao/bingusbread`, linked to the `bogbesor-afk/bingusbread` GitHub repo (auto-connected during `vercel link`)
+- Deploys via `npx vercel deploy --prod` from the project root (no global Vercel CLI install — permissions issue on this machine, so every command is run with `npx`)
+- Supabase Auth's **Site URL** and **Redirect URLs** (under Authentication → URL Configuration in the Supabase dashboard) are set to `https://bingusbread.vercel.app` / `https://bingusbread.vercel.app/**` — required for email confirmation links to work in production. This was done manually in the dashboard rather than via `supabase config push`, to avoid risking an unreviewed overwrite of other auth settings.
+- Full sign-up → household → transaction flow was verified directly on the live URL, not just locally.
 
 ---
 
@@ -148,7 +170,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 - Use TypeScript throughout (`.ts` and `.tsx` files only)
 - Use Tailwind CSS for all styling — no separate CSS files unless necessary
-- Use Supabase client from `lib/supabase.ts` for all database calls
+- Use `lib/supabase/server.ts` (server components/actions) or `lib/supabase/client.ts` (client components) for all database calls — never a bare client
+- Use `lib/household.ts`'s `requireHousehold()` on any page that needs "the signed-in user's household"
 - Server components for read-only data fetching; client components (`"use client"`) for interactive UI
 - Keep components small and focused on one thing
 - No placeholder or stub code left in production — every button should do something real
@@ -180,10 +203,15 @@ Two real bugs were caught and fixed during browser verification (not just typos 
 
 Every feature above was verified by actually driving the app in a browser (sign up, confirm via admin API since Supabase's test-email rate limit is low, create household, add/edit/delete transactions, add/delete categories, check dashboard math), not just type-checked. Test data was deleted from Supabase after each verification pass.
 
-**Next steps:**
-1. Deploy to Vercel so the app is actually usable on a phone (the whole point of "mobile web app") — in progress
-2. Before/soon after deploying: revisit Supabase email rate limits / custom SMTP if real usage needs more signups than the free tier allows
+**Deployed to production (2026-08-14):** Live at https://bingusbread.vercel.app. Full sign-up → household → transaction → dashboard flow verified directly on the live URL (not just locally) — see the Deployment section above for how it's wired up. This is now a real, usable mobile web app, not just a local dev project.
 
-**Deliberately out of scope for now** (per the "Key Product Decisions" above — revisit only if Benjamin asks): bank account connection, budgeting/goals/alerts, CSV export, multi-currency, more than 2 people per household.
+**Current phase: MVP complete.** Every item from the original "core workflow" is built, deployed, and verified: sign up/login, create a household, invite a partner (auto-linked by email on their signup), add/edit/delete transactions, manage categories, and a dashboard with this month's totals and a spending-by-category breakdown.
+
+**Next steps (all optional, only pursue if Benjamin asks for them):**
+1. If real signup volume ever hits Supabase's free-tier email rate limit, set up a custom SMTP provider in Supabase Auth settings
+2. Consider a transaction search/filter on `/transactions` once the list gets long
+3. Consider month navigation on the dashboard (currently always shows the current calendar month)
+
+**Deliberately out of scope** (per the "Key Product Decisions" above — revisit only if Benjamin explicitly asks to reconsider): bank account connection, budgeting/goals/alerts, CSV export, multi-currency, more than 2 people per household.
 
 **12-Week Plan:** not drafted as a formal week-by-week doc — built incrementally, one feature per session, same style as Tryout Scout.
