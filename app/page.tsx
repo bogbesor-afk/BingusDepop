@@ -1,197 +1,83 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { signOut } from "@/app/auth/actions";
+import { requireUser } from "@/lib/auth";
+import { getDashboardData } from "@/lib/dashboard";
+import { Nav } from "@/components/Nav";
+import { TrendChart, StockChart, TopSellersChart } from "@/components/DashboardCharts";
 
 const currency = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
 });
 
-function toDateString(d: Date) {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
+export default async function DashboardPage() {
+  const { supabase, user } = await requireUser();
+  const data = await getDashboardData(supabase, user.id);
 
-export default async function Home() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  let { data: membership } = await supabase
-    .from("household_members")
-    .select("id, household_id")
-    .eq("user_id", user.id)
-    .eq("status", "active")
-    .maybeSingle();
-
-  if (!membership) {
-    // The user may have been added to a household by email before they
-    // signed up — link them to it now that we know their user id.
-    const { data: pendingInvite } = await supabase
-      .from("household_members")
-      .select("id, household_id")
-      .eq("invited_email", user.email!.toLowerCase())
-      .eq("status", "invited")
-      .is("user_id", null)
-      .maybeSingle();
-
-    if (pendingInvite) {
-      await supabase
-        .from("household_members")
-        .update({ user_id: user.id, status: "active" })
-        .eq("id", pendingInvite.id);
-
-      membership = pendingInvite;
-    }
-  }
-
-  if (!membership) {
-    redirect("/household/new");
-  }
-
-  const { data: household } = await supabase
-    .from("households")
-    .select("name")
-    .eq("id", membership.household_id)
-    .single();
-
-  const now = new Date();
-  const monthStart = toDateString(new Date(now.getFullYear(), now.getMonth(), 1));
-  const monthLabel = now.toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
-  });
-
-  const { data: monthTransactions } = await supabase
-    .from("transactions")
-    .select("id, amount, type, date, description, categories(name)")
-    .eq("household_id", membership.household_id)
-    .gte("date", monthStart)
-    .order("date", { ascending: false })
-    .order("created_at", { ascending: false });
-
-  const rows = monthTransactions ?? [];
-  const income = rows
-    .filter((t) => t.type === "income")
-    .reduce((sum, t) => sum + Number(t.amount), 0);
-  const expenses = rows
-    .filter((t) => t.type === "expense")
-    .reduce((sum, t) => sum + Number(t.amount), 0);
-  const net = income - expenses;
-
-  const expenseByCategory = new Map<string, number>();
-  for (const t of rows) {
-    if (t.type !== "expense") continue;
-    const name =
-      (t.categories as unknown as { name: string } | null)?.name ??
-      "Uncategorized";
-    expenseByCategory.set(name, (expenseByCategory.get(name) ?? 0) + Number(t.amount));
-  }
-  const breakdown = [...expenseByCategory.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .map(([name, amount]) => ({
-      name,
-      amount,
-      percent: expenses > 0 ? (amount / expenses) * 100 : 0,
-    }));
-
-  const recent = rows.slice(0, 5);
+  const hasAnyData =
+    data.monthly.length > 0 || data.stockLevels.length > 0;
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-100 px-4 py-8">
-      <div className="max-w-md mx-auto space-y-6">
+    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+      <Nav active="dashboard" />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold">
-            {household?.name ?? "Your household"}
-          </h1>
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="text-sm text-neutral-400 hover:text-neutral-200"
-            >
-              Sign out
-            </button>
-          </form>
-        </div>
-
-        <div className="flex gap-3">
+          <h1 className="text-xl font-semibold">Dashboard</h1>
           <Link
-            href="/transactions/new"
-            className="flex-1 text-center rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium py-2"
+            href="/items"
+            className="rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium px-3 py-1.5"
           >
-            Add transaction
-          </Link>
-          <Link
-            href="/transactions"
-            className="flex-1 text-center rounded-md bg-neutral-800 hover:bg-neutral-700 text-white text-sm font-medium py-2"
-          >
-            All transactions
-          </Link>
-          <Link
-            href="/categories"
-            className="flex-1 text-center rounded-md bg-neutral-800 hover:bg-neutral-700 text-white text-sm font-medium py-2"
-          >
-            Categories
+            Go to inventory
           </Link>
         </div>
 
-        <div>
-          <h2 className="text-sm font-medium text-neutral-400 mb-2">
-            {monthLabel}
-          </h2>
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <div className="rounded-md bg-neutral-900 border border-neutral-800 px-3 py-3">
-              <p className="text-xs text-neutral-400">Income</p>
-              <p className="text-sm font-medium text-emerald-400 mt-1">
-                {currency.format(income)}
-              </p>
-            </div>
-            <div className="rounded-md bg-neutral-900 border border-neutral-800 px-3 py-3">
-              <p className="text-xs text-neutral-400">Expenses</p>
-              <p className="text-sm font-medium text-red-400 mt-1">
-                {currency.format(expenses)}
-              </p>
-            </div>
-            <div className="rounded-md bg-neutral-900 border border-neutral-800 px-3 py-3">
-              <p className="text-xs text-neutral-400">Net</p>
-              <p
-                className={`text-sm font-medium mt-1 ${
-                  net >= 0 ? "text-emerald-400" : "text-red-400"
-                }`}
-              >
-                {currency.format(net)}
-              </p>
-            </div>
-          </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard label="Revenue (sales)" value={currency.format(data.totalRevenue)} tone="positive" />
+          <StatCard label="Spent (restocking)" value={currency.format(data.totalSpent)} tone="negative" />
+          <StatCard
+            label="Cash profit"
+            value={currency.format(data.cashProfit)}
+            tone={data.cashProfit >= 0 ? "positive" : "negative"}
+          />
+          <StatCard label="Inventory value" value={currency.format(data.inventoryValue)} tone="neutral" />
         </div>
 
-        {breakdown.length > 0 && (
-          <div>
-            <h2 className="text-sm font-medium text-neutral-400 mb-2">
-              Spending by category
+        {data.restockSuggestions.length > 0 && (
+          <div className="rounded-lg border border-amber-900/50 bg-amber-950/20 p-4 space-y-3">
+            <h2 className="text-sm font-medium text-amber-300">
+              🔔 Restock suggestions
             </h2>
+            <p className="text-xs text-neutral-400 -mt-2">
+              Based on your sales pace over the last 30 days — not real AI,
+              just simple math on your own data.
+            </p>
             <div className="space-y-2">
-              {breakdown.map((b) => (
-                <div key={b.name}>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span>{b.name}</span>
-                    <span className="text-neutral-400">
-                      {currency.format(b.amount)} ({b.percent.toFixed(0)}%)
+              {data.restockSuggestions.map((s) => (
+                <div
+                  key={s.id}
+                  className="flex items-center justify-between text-sm bg-neutral-900 border border-neutral-800 rounded-md px-3 py-2"
+                >
+                  <div>
+                    <span className="font-medium">{s.name}</span>
+                    <span className="text-neutral-400 text-xs ml-2">
+                      {s.stock} left ·{" "}
+                      {s.daysLeft === Infinity
+                        ? "not selling"
+                        : `~${Math.floor(s.daysLeft)} days of stock`}
                     </span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-neutral-800 overflow-hidden">
-                    <div
-                      className="h-full bg-emerald-600"
-                      style={{ width: `${b.percent}%` }}
-                    />
+                  <div className="text-right">
+                    <p>
+                      Buy <span className="font-medium">{s.suggestedQty}</span>{" "}
+                      more
+                    </p>
+                    <p
+                      className={`text-xs ${
+                        s.affordable ? "text-neutral-400" : "text-red-400"
+                      }`}
+                    >
+                      ~{currency.format(s.suggestedCost)}
+                      {!s.affordable && " · exceeds current cash profit"}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -199,49 +85,65 @@ export default async function Home() {
           </div>
         )}
 
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-sm font-medium text-neutral-400">
-              Recent activity
-            </h2>
-            <Link
-              href="/transactions"
-              className="text-xs text-neutral-400 hover:text-neutral-200"
-            >
-              View all
-            </Link>
+        {!hasAnyData ? (
+          <p className="text-sm text-neutral-400">
+            No data yet.{" "}
+            <Link href="/items/new" className="text-emerald-400 hover:text-emerald-300">
+              Add your first item
+            </Link>{" "}
+            to start tracking.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-4">
+              <h2 className="text-sm font-medium text-neutral-400 mb-2">
+                Revenue vs. spending (last 6 months)
+              </h2>
+              <TrendChart data={data.monthly} />
+            </div>
+            <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-4">
+              <h2 className="text-sm font-medium text-neutral-400 mb-2">
+                Current stock by item
+              </h2>
+              <StockChart data={data.stockLevels} />
+            </div>
+            {data.topSellers.length > 0 && (
+              <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 lg:col-span-2">
+                <h2 className="text-sm font-medium text-neutral-400 mb-2">
+                  Top sellers by revenue
+                </h2>
+                <TopSellersChart data={data.topSellers} />
+              </div>
+            )}
           </div>
-          {recent.length === 0 ? (
-            <p className="text-sm text-neutral-400">
-              No transactions yet this month.
-            </p>
-          ) : (
-            <ul className="divide-y divide-neutral-800 rounded-md border border-neutral-800 overflow-hidden">
-              {recent.map((t) => (
-                <li
-                  key={t.id}
-                  className="flex items-center justify-between px-3 py-2 bg-neutral-900"
-                >
-                  <span className="text-sm">
-                    {(t.categories as unknown as { name: string } | null)
-                      ?.name ?? "Uncategorized"}
-                  </span>
-                  <span
-                    className={`text-sm font-medium ${
-                      t.type === "income"
-                        ? "text-emerald-400"
-                        : "text-red-400"
-                    }`}
-                  >
-                    {t.type === "income" ? "+" : "-"}
-                    {currency.format(Number(t.amount))}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-    </main>
+        )}
+      </main>
+    </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone: "positive" | "negative" | "neutral";
+}) {
+  const toneClass =
+    tone === "positive"
+      ? "text-emerald-400"
+      : tone === "negative"
+      ? "text-red-400"
+      : "text-neutral-100";
+
+  return (
+    <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-4">
+      <p className="text-xs text-neutral-400">{label}</p>
+      <p className={`text-lg sm:text-2xl font-semibold mt-1 ${toneClass}`}>
+        {value}
+      </p>
+    </div>
   );
 }

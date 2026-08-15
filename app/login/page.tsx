@@ -14,9 +14,9 @@ export default async function LoginPage({
     <main className="min-h-screen flex items-center justify-center bg-neutral-950 text-neutral-100 px-4">
       <div className="w-full max-w-sm space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold">Bingusbread</h1>
+          <h1 className="text-2xl font-semibold">BingusDepop</h1>
           <p className="text-neutral-400 text-sm mt-1">
-            Track your household finances together.
+            Track your inventory, sales, and profit.
           </p>
         </div>
 

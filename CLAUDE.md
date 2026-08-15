@@ -1,4 +1,4 @@
-# CLAUDE.md — Bingusbread
+# CLAUDE.md — BingusDepop
 
 This file tells Claude Code everything it needs to know about this project and how to work with the person building it. Claude Code should read this at the start of every session and update it whenever a significant decision is made.
 
@@ -14,26 +14,26 @@ Benjamin has zero coding or technical experience. This project is both a product
 - Keep explanations short — 2–4 sentences before showing any code
 - If introducing a new concept (e.g. API route, environment variable, foreign key), define it before using it
 - Never use an abbreviation without expanding it first
-- Do not make multiple large changes at once — one feature, one file, one task per response
+- Do not make multiple large changes at once — one feature, one file, one task per response (this rule was relaxed once, on 2026-08-15, at Benjamin's explicit request to rebuild the whole app in one autonomous pass while he was away — see Build Progress below. Default back to incremental, one-thing-at-a-time delivery unless he asks for a big autonomous push again.)
 - After every change, include a "Verify:" step — one sentence telling Benjamin what to check to confirm it worked
 
 ---
 
 ## What We Are Building
 
-**Bingusbread** is a web app for tracking personal/household finances — income, expenses, and categories — shared between two people (e.g. a household budget).
+**BingusDepop** helps Benjamin run his Depop reselling business: he buys clothes in bulk from a manufacturer, then resells them on Depop. The app tracks inventory (what he has, what he paid for it) and money (what he's spent vs. earned), and visualizes it so he can actually understand his business at a glance instead of losing track.
 
-**The core workflow (v1):**
-1. Benjamin creates a household/budget space and invites a second person by email
-2. Either person manually logs transactions (amount, category, date, income or expense, who added it)
-3. The app shows totals, spending by category, and a running balance
-4. (Later) Bank account connection via Plaid to auto-import transactions
+**The core workflow (v1, single user — no sharing/household concept):**
+1. Add an "item" once — a type of thing he buys in bulk (e.g. "Vintage Denim Jacket") with its cost per unit, so the cost never has to be re-typed
+2. Log a **restock** when he buys more of an item (quantity + cost that time, since manufacturer pricing can shift)
+3. Log a **sale** when something sells on Depop (quantity + sale price)
+4. The **Dashboard** shows revenue, money spent restocking, cash profit, current inventory value, charts (revenue/spend trend, stock levels per item, top sellers), and **restock suggestions** — a rule-based (not real AI/ML) feature that looks at each item's actual sales pace over the last 30 days and flags what's about to run out, how much to buy, what it'll cost, and whether that cost fits within current cash profit
 
-**What it is NOT (v1):**
-- Not connected to real bank accounts yet — manual entry only to start
-- Not more than 2 users per household
-- Not a budgeting/goal-setting tool yet (no monthly limits, alerts, or forecasts) — pure tracking first
-- Not a native mobile app — it's a responsive web app that works well on both phone and desktop browsers
+**What it is NOT:**
+- Not multi-user / no household or sharing concept — this is Benjamin's own business tracker
+- Not real AI — the "restock suggestions" are simple velocity math on his own sales data, clearly labeled as such in the UI so it's never overclaimed as more than it is
+- Not doing formal accrual accounting (FIFO/LIFO cost-of-goods-sold) — "cash profit" is simply total revenue minus total spent on restocking, which is more intuitive for a small reseller than strict accounting
+- Not mobile-only — must look and work well on both a phone and a full desktop browser, using the available width on each rather than a narrow centered phone-width column everywhere
 
 ---
 
@@ -43,9 +43,10 @@ Benjamin has zero coding or technical experience. This project is both a product
 |---|---|---|
 | Frontend | Next.js (App Router, TypeScript) | The framework that organizes all the app's pages, forms, and logic |
 | Styling | Tailwind CSS | Pre-made CSS classes that make things look good without writing custom style sheets |
-| Database | Supabase | An online database that stores households, transactions, and categories |
-| Auth | Supabase Auth | Handles sign-up/login and lets us invite a second person to a household by email |
-| Deployment | Vercel (planned) | Publishes the app to the internet |
+| Charts | Recharts | React charting library used on the dashboard (line/bar charts) |
+| Database | Supabase | An online database that stores items, purchases (restocks), and sales |
+| Auth | Supabase Auth | Handles sign-up/login |
+| Deployment | Vercel | Publishes the app to the internet |
 | Dev Environment | VS Code + Claude Code | Where the code is written and Claude Code is used as the coding assistant |
 
 ---
@@ -55,63 +56,63 @@ Benjamin has zero coding or technical experience. This project is both a product
 **Remote URL:** `https://github.com/bogbesor-afk/bingusbread.git`
 **Branch:** `main`
 
+Note: the GitHub repo, Vercel project, and live URL are still named `bingusbread` — kept as-is during the 2026-08-15 pivot to avoid infra risk (renaming could break the Vercel↔GitHub link or require reconfiguring the live domain) while Benjamin was away. The app itself is branded "BingusDepop" throughout the UI. Renaming the underlying repo/project/domain to match is a easy future task if Benjamin wants it — just ask before doing it, since it changes URLs.
+
 ---
 
 ## Commit and Push Rules
 
-Same rules as Tryout Scout:
-
 1. After every day's tasks are complete, commit all changes with a clear message and push to GitHub.
 2. After completing any major feature, commit and push immediately — don't wait until end of day.
 3. Before starting any risky or large change, commit the current working state first.
-4. Commit message format: plain English descriptions of what was done (e.g. `Add manual transaction form` not `fix stuff`).
+4. Commit message format: plain English descriptions of what was done (e.g. `Add restock suggestion logic` not `fix stuff`).
 5. Never skip a push when code is working.
+6. Deploy to Vercel (`npx vercel deploy --prod`, no global CLI install — see Deployment section) after pushing any user-facing change, since Benjamin actually uses the live site day to day.
 
 ---
 
-## Key Product Decisions (Final)
+## Key Product Decisions
 
-These were decided during planning on 2026-08-14 and should not be revisited unless Benjamin explicitly asks to reconsider.
-
-- Manual transaction entry only in v1 — no bank connection yet
-- Bank connection (via Plaid) is a planned future feature — schema should not block adding it later
-- Shared household budget: 2 people per household, invited by email via Supabase Auth
-- Responsive web app — must work well on both phone and desktop browsers (not native, not desktop-only)
-- No budgeting/goals/alerts in v1 — tracking and category breakdowns only
+- 2026-08-14: original app built as "Bingusbread", a shared household budget tracker. Superseded below.
+- **2026-08-15 — full pivot:** Benjamin asked to throw out the household budget concept entirely and rebuild the app as a single-user Depop reselling inventory/profit tracker, called BingusDepop. Only login/signup were kept; everything else (households, categories, transactions) was removed and replaced. He explicitly authorized doing this as one large autonomous pass (schema changes, full rebuild, deploy) while he was away, rather than the usual one-feature-at-a-time approach — see Build Progress.
+- Single user, no sharing/household/invite concept
+- Restock suggestions are simple rule-based math (sales velocity over last 30 days vs. current stock), explicitly not presented as real AI/ML in the UI copy
+- Responsive, full-width layout required — not a narrow mobile-width column on desktop
+- Cash-basis profit (revenue − restocking spend), not formal accrual accounting
 
 ---
 
-## Database Schema (planned, not yet created in Supabase)
+## Database Schema
 
-**households** — One row per shared budget space
+**items** — One row per type of item Benjamin buys in bulk
 - `id` (uuid, primary key)
+- `user_id` (uuid, links to auth.users)
 - `name` (text)
+- `cost_per_unit` (numeric) — default/most recent cost from the manufacturer
+- `sale_price_default` (numeric, optional) — usual Depop listing price, pre-fills the sell form
 - `created_at` (timestamp)
 
-**household_members** — Links a Supabase Auth user to a household
+**purchases** — One row per restock event
 - `id` (uuid, primary key)
-- `household_id` (uuid, links to households)
-- `user_id` (uuid, links to Supabase auth.users)
-- `invited_email` (text) — used before the invite is accepted
-- `status` (text: 'invited' / 'active')
+- `user_id` (uuid, links to auth.users)
+- `item_id` (uuid, links to items)
+- `quantity` (integer)
+- `unit_cost` (numeric) — snapshotted per purchase, since manufacturer pricing can change over time
+- `purchased_at` (date)
 - `created_at` (timestamp)
 
-**categories** — Expense/income categories, e.g. Groceries, Rent, Salary
+**sales** — One row per Depop sale
 - `id` (uuid, primary key)
-- `household_id` (uuid, links to households)
-- `name` (text)
-- `type` (text: 'income' / 'expense')
-
-**transactions** — One row per manually entered transaction
-- `id` (uuid, primary key)
-- `household_id` (uuid, links to households)
-- `category_id` (uuid, links to categories)
-- `added_by_user_id` (uuid, links to auth.users)
-- `amount` (numeric)
-- `type` (text: 'income' / 'expense')
-- `description` (text, optional)
-- `date` (date)
+- `user_id` (uuid, links to auth.users)
+- `item_id` (uuid, links to items)
+- `quantity` (integer)
+- `unit_price` (numeric) — snapshotted per sale
+- `sold_at` (date)
 - `created_at` (timestamp)
+
+Stock on hand and all dashboard stats are **computed**, not stored — `lib/inventory.ts` and `lib/dashboard.ts` derive everything from summing `purchases` and `sales` rows for a given item/user. This avoids any risk of a stored "current stock" number drifting out of sync with the actual purchase/sale history.
+
+RLS: all three tables use the simplest possible policy — `user_id = auth.uid()` for every operation. No cross-user sharing exists, so no security-definer helper function is needed (unlike the old household-based RLS, which needed one to avoid recursive policy checks).
 
 ---
 
@@ -119,23 +120,25 @@ These were decided during planning on 2026-08-14 and should not be revisited unl
 
 ```
 app/
-  page.tsx                          → Dashboard: this month's totals, spending by category, recent activity
+  page.tsx                          → Dashboard: stat cards, restock suggestions, charts
   login/
-    page.tsx, actions.ts            → Sign in / sign up
+    page.tsx, actions.ts            → Sign in / sign up (single form, toggled by ?mode=)
   auth/
     actions.ts                      → Sign out
     callback/route.ts               → Handles email confirmation redirect
-  household/
-    new/page.tsx, actions.ts        → Create a household + invite partner by email
-  transactions/
-    page.tsx                        → Full list with income/expense/net totals
-    new/page.tsx, actions.ts        → Add a transaction
-    [id]/edit/page.tsx, actions.ts, DeleteButton.tsx → Edit or delete a transaction
-  categories/
-    page.tsx, actions.ts, DeleteCategoryButton.tsx   → Add/delete categories
+  items/
+    page.tsx                        → Inventory list — cards per item with stock on hand
+    new/page.tsx, actions.ts        → Add a new item type
+    [id]/restock/page.tsx, actions.ts → Log a restock (purchase)
+    [id]/sell/page.tsx, actions.ts    → Log a sale
 middleware.ts                       → Refreshes the Supabase session cookie on every request
+components/
+  Nav.tsx                           → Shared top nav (BingusDepop branding, Dashboard/Inventory links, sign out)
+  DashboardCharts.tsx                → Client components wrapping Recharts (TrendChart, StockChart, TopSellersChart)
 lib/
-  household.ts                      → requireHousehold() — shared "get the signed-in user's household" helper
+  auth.ts                           → requireUser() — get the signed-in user or redirect to /login
+  inventory.ts                      → getItemsWithStock() — items + computed stock/cost/revenue per item
+  dashboard.ts                      → getDashboardData() — all dashboard stats, chart data, and restock suggestions
   supabase/
     client.ts                       → Browser Supabase client
     server.ts                       → Server component / server action Supabase client
@@ -151,18 +154,17 @@ Live in `.env.local` locally (never committed to GitHub) and as encrypted Produc
 ```
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-NEXT_PUBLIC_SITE_URL=your_deployed_url   # used for auth email confirmation redirects; defaults to localhost:3212 if unset
+NEXT_PUBLIC_SITE_URL=your_deployed_url   # used for auth email confirmation redirects
 ```
 
 ---
 
 ## Deployment
 
-- **Live URL:** https://bingusbread.vercel.app
-- **Vercel project:** `benjyao/bingusbread`, linked to the `bogbesor-afk/bingusbread` GitHub repo (auto-connected during `vercel link`)
-- Deploys via `npx vercel deploy --prod` from the project root (no global Vercel CLI install — permissions issue on this machine, so every command is run with `npx`)
-- Supabase Auth's **Site URL** and **Redirect URLs** (under Authentication → URL Configuration in the Supabase dashboard) are set to `https://bingusbread.vercel.app` / `https://bingusbread.vercel.app/**` — required for email confirmation links to work in production. This was done manually in the dashboard rather than via `supabase config push`, to avoid risking an unreviewed overwrite of other auth settings.
-- Full sign-up → household → transaction flow was verified directly on the live URL, not just locally.
+- **Live URL:** https://bingusbread.vercel.app (app displays as "BingusDepop" — see note under GitHub Repository above)
+- **Vercel project:** `benjyao/bingusbread`, linked to the `bogbesor-afk/bingusbread` GitHub repo
+- Deploys via `npx vercel deploy --prod` from the project root (no global Vercel CLI install — permissions issue on this machine, so every command uses `npx`)
+- Supabase Auth's **Site URL** and **Redirect URLs** (Authentication → URL Configuration in the Supabase dashboard) are set to the live URL — required for email confirmation links to work in production. Changed manually in the dashboard, not via `supabase config push`, to avoid risking an unreviewed overwrite of other auth settings.
 
 ---
 
@@ -171,8 +173,10 @@ NEXT_PUBLIC_SITE_URL=your_deployed_url   # used for auth email confirmation redi
 - Use TypeScript throughout (`.ts` and `.tsx` files only)
 - Use Tailwind CSS for all styling — no separate CSS files unless necessary
 - Use `lib/supabase/server.ts` (server components/actions) or `lib/supabase/client.ts` (client components) for all database calls — never a bare client
-- Use `lib/household.ts`'s `requireHousehold()` on any page that needs "the signed-in user's household"
-- Server components for read-only data fetching; client components (`"use client"`) for interactive UI
+- Use `lib/auth.ts`'s `requireUser()` on any page that needs "the signed-in user or redirect to login"
+- Use `lib/inventory.ts` / `lib/dashboard.ts` for stock/stat calculations rather than duplicating the purchase/sale aggregation logic elsewhere
+- Server components for read-only data fetching; client components (`"use client"`) only where interactivity or a browser-only library (like Recharts) requires it
+- Layout should use the full available width responsively (`max-w-7xl` + responsive grid columns) on data-dense pages like the dashboard and inventory list — not a narrow `max-w-sm`/`max-w-md` column, which is reserved for simple centered forms (login, add item, restock, sell)
 - Keep components small and focused on one thing
 - No placeholder or stub code left in production — every button should do something real
 
@@ -180,38 +184,24 @@ NEXT_PUBLIC_SITE_URL=your_deployed_url   # used for auth email confirmation redi
 
 ## Build Progress
 
-**Current phase:** Project scaffolded, GitHub repo live (private, `bogbesor-afk/bingusbread`), Supabase project created (`bingusbread`, ref `fpixriowfqdhthjthucp`, region us-east-2) and linked. Schema (households, household_members, categories, transactions) is applied via `supabase/migrations/20260814000000_init_schema.sql`.
+**2026-08-14:** Built and deployed "Bingusbread," a shared household budget tracker (sign up/login, households, invite-by-email, transactions, categories, dashboard). Fully superseded by the pivot below — kept in git history but no longer describes the app.
 
-Auth is built and verified end-to-end in the browser: sign up, email confirmation (Supabase's built-in flow), sign in, sign out, household creation, and the auto-link-by-email mechanic (a user who signs up with an email that's already sitting in `household_members` as `status: 'invited'` gets automatically linked to that household on their first login — no admin invite email needed). Session handling uses `@supabase/ssr` (`lib/supabase/client.ts`, `server.ts`, `middleware.ts`, root `middleware.ts`). Pages: `app/login`, `app/household/new`, `app/auth/callback`, `app/page.tsx` (dashboard placeholder + redirect logic).
+**2026-08-15 — pivoted to BingusDepop.** Benjamin asked for a complete rebuild while he was away at work, explicitly authorizing autonomous execution (schema changes, full app rebuild, commit/push/deploy) without stopping for permission at each step. What was built:
 
-**Security gap closed (2026-08-14):** Row Level Security (RLS) is now enabled on all four tables via `supabase/migrations/20260814020000_add_rls_policies.sql`, scoped to household membership through a `security definer` helper function `is_household_member(household_id)` (avoids infinite-recursion issues that come from a table's RLS policy querying itself). Verified directly: an anonymous request to the REST API now returns `[]` for households/household_members even when real rows exist, and a signed-in user can only see/modify data for households they belong to.
+- **Schema:** dropped `households`/`household_members`/`categories`/`transactions` and their RLS policies/helper function entirely (migration `20260815000000_pivot_to_bingusdepop.sql`). Created `items`/`purchases`/`sales`, each scoped by `user_id` with simple RLS.
+- **Removed:** `app/household`, `app/categories`, `app/transactions`, `lib/household.ts`.
+- **Added:** `app/items/*` (inventory list, add item, restock, sell), new `app/page.tsx` dashboard, `lib/auth.ts`, `lib/inventory.ts`, `lib/dashboard.ts`, `components/Nav.tsx`, `components/DashboardCharts.tsx` (Recharts-based).
+- **Restock suggestions:** computes each item's sales velocity over the last 30 days; if days-of-stock-left < 14 and the item is actually selling, suggests a reorder quantity (targeting ~30 days of stock) and its cost, flagging whether that cost exceeds current cash profit. Explicitly labeled in the UI as simple math, not real AI, to avoid overclaiming.
+- **Layout:** rebuilt around a shared `Nav` component and full-width responsive containers/grids, replacing the old narrow mobile-width centered column that looked like "a phone on a computer" per Benjamin's feedback.
+- **Verified end-to-end locally in the browser** before deploying: signed up, added an item, logged a restock, logged a sale, confirmed every dashboard number (revenue, spent, cash profit, inventory value) matched hand-calculated expected values, confirmed all three charts render with real data, and specifically drove stock down low enough to confirm the restock suggestion triggers with correct quantity/cost math. Test data deleted from Supabase afterward.
 
-One RLS-driven fix worth knowing about: `app/household/new/actions.ts` used to insert a household then immediately `.select()` it back — but right after creation the user isn't an active member yet, so the "view your household" policy blocked reading the row back (chicken-and-egg). Fixed by generating the household's UUID client-side (`crypto.randomUUID()`) and inserting with that ID directly, so no read-back is needed. The two `household_members` inserts (self, then optionally partner) also had to become sequential rather than one batched insert, since the partner row's policy check depends on the self row already existing.
+**Known good, low-risk decision:** kept the GitHub repo, Vercel project, and live domain named `bingusbread` rather than renaming to `bingusdepop` — purely an infra-continuity choice made while Benjamin was unreachable, not a product decision. Fine to rename later if he wants a matching URL; just confirm with him first since it changes links.
 
-**Also noted:** Supabase's free-tier shared SMTP has a low rate limit on outgoing auth emails (hit "email rate limit exceeded" during testing after a couple of signups in quick succession). Not a bug — just something to be aware of if testing signup repeatedly. A custom SMTP provider would remove this limit if it becomes an issue for real usage.
+**Next steps (all optional — only pursue if Benjamin asks):**
+1. Consider renaming the GitHub repo / Vercel project / domain to match "BingusDepop" if he wants a matching URL
+2. Item detail page showing purchase/sale history for a single item, if the inventory list ever feels insufficient
+3. Editing/deleting individual purchase or sale entries (currently log-only, matching how the original transaction feature started before edit/delete were added later — same pattern likely wanted here eventually)
+4. Month navigation or date-range filtering on the dashboard (currently shows all-time stats + last 6 months trend)
+5. If Supabase's free-tier email rate limit becomes an issue with real signup volume, set up custom SMTP
 
-**Transaction entry and list built (2026-08-14):** `app/transactions/new` (form) and `app/transactions` (list with income/expense/net totals) are live, backed by a shared `lib/household.ts` helper (`requireHousehold()`) that any page needing "the signed-in user's active household" can reuse. Household creation now also seeds 10 default categories (8 expense, 2 income) so the transaction form is immediately usable — there's no category-management UI yet, so categories can only be added/edited directly in Supabase for now.
-
-Two real bugs were caught and fixed during browser verification (not just typos — worth remembering the underlying lessons):
-- **Category always showed "Uncategorized":** the Supabase join `categories(name)` returns a single *object* at runtime for a belongs-to relationship, but TypeScript's default inference (without generated `Database` types) guesses it's an *array*. Code was doing `t.categories?.[0]?.name`, which is always undefined on an object. Fixed by casting to the correct object shape instead. Worth remembering for any future embedded-relation query in this codebase.
-- **Dates displayed one day earlier than entered:** `new Date("2026-08-14")` parses date-only strings as UTC midnight; `.toLocaleDateString()` then renders in the browser's local timezone, which rolls back a day in any US timezone. Fixed with a `formatDate()` helper that builds the `Date` from local year/month/day components instead of parsing the string directly. Any future date-only field rendered from the database should use this same pattern, not `new Date(dateString)` directly.
-
-**Full MVP loop completed and verified in the browser (2026-08-14):**
-- Transaction edit/delete: `app/transactions/[id]/edit` (page + actions.ts). Delete has a client-side `confirm()` guard (`DeleteButton.tsx`) — verified in testing that a cancelled confirm correctly blocks the delete, and an accepted one correctly removes the row.
-- Category management: `app/categories` (page + actions.ts) — add/delete categories per household, grouped by expense/income. Deleting a category is safe: `transactions.category_id` is `on delete set null`, so existing transactions just become "Uncategorized" rather than breaking.
-- Real dashboard: `app/page.tsx` now shows the current calendar month's income/expenses/net, a spending-by-category breakdown with percentage bars, and the 5 most recent transactions — not just a placeholder. Quick links to Add transaction / All transactions / Categories.
-
-Every feature above was verified by actually driving the app in a browser (sign up, confirm via admin API since Supabase's test-email rate limit is low, create household, add/edit/delete transactions, add/delete categories, check dashboard math), not just type-checked. Test data was deleted from Supabase after each verification pass.
-
-**Deployed to production (2026-08-14):** Live at https://bingusbread.vercel.app. Full sign-up → household → transaction → dashboard flow verified directly on the live URL (not just locally) — see the Deployment section above for how it's wired up. This is now a real, usable mobile web app, not just a local dev project.
-
-**Current phase: MVP complete.** Every item from the original "core workflow" is built, deployed, and verified: sign up/login, create a household, invite a partner (auto-linked by email on their signup), add/edit/delete transactions, manage categories, and a dashboard with this month's totals and a spending-by-category breakdown.
-
-**Next steps (all optional, only pursue if Benjamin asks for them):**
-1. If real signup volume ever hits Supabase's free-tier email rate limit, set up a custom SMTP provider in Supabase Auth settings
-2. Consider a transaction search/filter on `/transactions` once the list gets long
-3. Consider month navigation on the dashboard (currently always shows the current calendar month)
-
-**Deliberately out of scope** (per the "Key Product Decisions" above — revisit only if Benjamin explicitly asks to reconsider): bank account connection, budgeting/goals/alerts, CSV export, multi-currency, more than 2 people per household.
-
-**12-Week Plan:** not drafted as a formal week-by-week doc — built incrementally, one feature per session, same style as Tryout Scout.
+**12-Week Plan:** not drafted as a formal week-by-week doc — built incrementally (except for the 2026-08-15 pivot, done as one large autonomous pass at Benjamin's request).

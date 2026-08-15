@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bingusbread",
-  description: "Track your household finances together.",
+  title: "BingusDepop",
+  description: "Track your inventory, sales, and profit.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
