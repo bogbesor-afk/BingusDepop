@@ -30,13 +30,13 @@ export default async function RestockPage({
   const today = new Date().toISOString().slice(0, 10);
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+    <div className="min-h-screen bg-white text-neutral-900">
       <Nav active="items" />
       <main className="max-w-md mx-auto px-4 py-8 space-y-6">
         <div>
           <Link
             href="/items"
-            className="text-sm text-neutral-400 hover:text-neutral-200"
+            className="text-sm text-neutral-500 hover:text-neutral-900"
           >
             ← Back to inventory
           </Link>
@@ -44,7 +44,7 @@ export default async function RestockPage({
         </div>
 
         {error && (
-          <p className="text-sm text-red-400 bg-red-950/50 border border-red-900 rounded-md px-3 py-2">
+          <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
             {error}
           </p>
         )}
@@ -61,7 +61,7 @@ export default async function RestockPage({
               step="1"
               min="1"
               required
-              className="w-full rounded-md bg-neutral-900 border border-neutral-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
+              className="w-full rounded-md bg-white border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>
           <div>
@@ -76,7 +76,7 @@ export default async function RestockPage({
               min="0"
               required
               defaultValue={item.cost_per_unit}
-              className="w-full rounded-md bg-neutral-900 border border-neutral-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
+              className="w-full rounded-md bg-white border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>
           <div>
@@ -89,12 +89,12 @@ export default async function RestockPage({
               type="date"
               required
               defaultValue={today}
-              className="w-full rounded-md bg-neutral-900 border border-neutral-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
+              className="w-full rounded-md bg-white border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>
           <button
             type="submit"
-            className="w-full rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium py-2"
+            className="w-full rounded-md bg-red-600 hover:bg-red-500 text-white text-sm font-medium py-2"
           >
             Log restock
           </button>

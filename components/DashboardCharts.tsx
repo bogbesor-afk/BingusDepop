@@ -12,36 +12,35 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import type {
-  MonthlyPoint,
-  StockLevel,
-  TopSeller,
-} from "@/lib/dashboard";
+import type { MonthlyPoint, StockLevel, ForecastPoint } from "@/lib/dashboard";
 
-const gridColor = "#262626";
-const textColor = "#a3a3a3";
+const gridColor = "#e5e5e5";
+const textColor = "#737373";
+const sage = "#8A9A5B";
+const darkGreen = "#3B4A3B";
+
+const tooltipStyle = {
+  background: "#ffffff",
+  border: "1px solid #e5e5e5",
+  borderRadius: 6,
+  fontSize: 12,
+  color: "#171717",
+};
 
 export function TrendChart({ data }: { data: MonthlyPoint[] }) {
   return (
-    <ResponsiveContainer width="100%" height={260}>
+    <ResponsiveContainer width="100%" height={220}>
       <LineChart data={data}>
         <CartesianGrid stroke={gridColor} strokeDasharray="3 3" />
         <XAxis dataKey="label" stroke={textColor} fontSize={12} />
         <YAxis stroke={textColor} fontSize={12} />
-        <Tooltip
-          contentStyle={{
-            background: "#171717",
-            border: "1px solid #262626",
-            borderRadius: 6,
-            fontSize: 12,
-          }}
-        />
+        <Tooltip contentStyle={tooltipStyle} />
         <Legend wrapperStyle={{ fontSize: 12 }} />
         <Line
           type="monotone"
           dataKey="revenue"
           name="Revenue"
-          stroke="#34d399"
+          stroke={sage}
           strokeWidth={2}
           dot={false}
         />
@@ -49,7 +48,7 @@ export function TrendChart({ data }: { data: MonthlyPoint[] }) {
           type="monotone"
           dataKey="spent"
           name="Spent on stock"
-          stroke="#f87171"
+          stroke={darkGreen}
           strokeWidth={2}
           dot={false}
         />
@@ -60,7 +59,7 @@ export function TrendChart({ data }: { data: MonthlyPoint[] }) {
 
 export function StockChart({ data }: { data: StockLevel[] }) {
   return (
-    <ResponsiveContainer width="100%" height={260}>
+    <ResponsiveContainer width="100%" height={220}>
       <BarChart data={data}>
         <CartesianGrid stroke={gridColor} strokeDasharray="3 3" />
         <XAxis
@@ -73,43 +72,52 @@ export function StockChart({ data }: { data: StockLevel[] }) {
           height={50}
         />
         <YAxis stroke={textColor} fontSize={12} allowDecimals={false} />
-        <Tooltip
-          contentStyle={{
-            background: "#171717",
-            border: "1px solid #262626",
-            borderRadius: 6,
-            fontSize: 12,
-          }}
-        />
-        <Bar dataKey="stock" name="In stock" fill="#60a5fa" radius={[4, 4, 0, 0]} />
+        <Tooltip contentStyle={tooltipStyle} />
+        <Bar dataKey="stock" name="In stock" fill={sage} radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );
 }
 
-export function TopSellersChart({ data }: { data: TopSeller[] }) {
+export function ForecastChart({ data }: { data: ForecastPoint[] }) {
   return (
-    <ResponsiveContainer width="100%" height={260}>
-      <BarChart data={data} layout="vertical">
+    <ResponsiveContainer width="100%" height={220}>
+      <LineChart data={data}>
         <CartesianGrid stroke={gridColor} strokeDasharray="3 3" />
-        <XAxis type="number" stroke={textColor} fontSize={12} />
-        <YAxis
-          dataKey="name"
-          type="category"
-          stroke={textColor}
-          fontSize={11}
-          width={110}
+        <XAxis dataKey="label" stroke={textColor} fontSize={12} />
+        <YAxis stroke={textColor} fontSize={12} />
+        <Tooltip contentStyle={tooltipStyle} />
+        <Legend wrapperStyle={{ fontSize: 12 }} />
+        <Line
+          type="monotone"
+          dataKey="revenue"
+          name="Revenue"
+          stroke={sage}
+          strokeWidth={2}
+          dot={{ r: 3 }}
+          connectNulls
         />
-        <Tooltip
-          contentStyle={{
-            background: "#171717",
-            border: "1px solid #262626",
-            borderRadius: 6,
-            fontSize: 12,
-          }}
+        <Line
+          type="monotone"
+          dataKey="profit"
+          name="Cash profit"
+          stroke={darkGreen}
+          strokeWidth={2}
+          dot={{ r: 3 }}
+          connectNulls
         />
-        <Bar dataKey="revenue" name="Revenue" fill="#34d399" radius={[0, 4, 4, 0]} />
-      </BarChart>
+        <Line
+          type="monotone"
+          dataKey="projectedProfit"
+          name="Projected profit"
+          stroke={darkGreen}
+          strokeWidth={2}
+          strokeDasharray="5 5"
+          strokeOpacity={0.6}
+          dot={false}
+          connectNulls
+        />
+      </LineChart>
     </ResponsiveContainer>
   );
 }
