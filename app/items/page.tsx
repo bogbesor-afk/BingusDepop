@@ -2,7 +2,8 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { getItemsWithStock } from "@/lib/inventory";
 import { Nav } from "@/components/Nav";
-import { logQuickSale } from "./actions";
+import { DeleteItemButton } from "@/components/DeleteItemButton";
+import { logQuickSale, deleteItem } from "./actions";
 
 const currency = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -23,7 +24,7 @@ export default async function ItemsPage() {
             href="/items/new"
             className="rounded-md bg-red-600 hover:bg-red-500 text-white text-sm font-medium px-3 py-1.5"
           >
-            Add item
+            Add Item
           </Link>
         </div>
 
@@ -39,13 +40,18 @@ export default async function ItemsPage() {
                 key={item.id}
                 className="rounded-lg border border-neutral-200 bg-white shadow-sm p-4 space-y-3"
               >
-                <div>
-                  <h2 className="font-medium">{item.name}</h2>
-                  <p className="text-xs text-neutral-500 mt-0.5">
-                    Cost {currency.format(item.cost_per_unit)} / unit
-                    {item.sale_price_default != null &&
-                      ` · Sells for ${currency.format(item.sale_price_default)}`}
-                  </p>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h2 className="font-medium">{item.name}</h2>
+                    <p className="text-xs text-neutral-500 mt-0.5">
+                      Cost {currency.format(item.cost_per_unit)} / unit
+                      {item.sale_price_default != null &&
+                        ` · Sells for ${currency.format(item.sale_price_default)}`}
+                    </p>
+                  </div>
+                  <form action={deleteItem.bind(null, item.id)}>
+                    <DeleteItemButton itemName={item.name} />
+                  </form>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <span
@@ -55,7 +61,7 @@ export default async function ItemsPage() {
                   >
                     {item.stock}
                   </span>
-                  <span className="text-xs text-neutral-500">in stock</span>
+                  <span className="text-xs text-neutral-500">In Stock</span>
                 </div>
                 <div className="flex gap-2 pt-1">
                   <Link
@@ -72,7 +78,7 @@ export default async function ItemsPage() {
                       type="submit"
                       className="w-full rounded-md bg-red-600 hover:bg-red-500 text-white text-xs font-medium py-1.5"
                     >
-                      Log sale (+1)
+                      Log Sale (+1)
                     </button>
                   </form>
                 </div>

@@ -25,7 +25,7 @@ export default async function DashboardPage() {
             href="/items"
             className="rounded-md bg-red-600 hover:bg-red-500 text-white text-sm font-medium px-3 py-1.5"
           >
-            Go to inventory
+            Go to Inventory
           </Link>
         </div>
 
@@ -41,26 +41,26 @@ export default async function DashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-6">
             {/* Left: graphs */}
             <div className="space-y-6">
-              <ChartCard title="Revenue vs. spending (last 6 months)">
+              <ChartCard title="Revenue vs. Spending (Last 6 Months)">
                 <TrendChart data={data.monthly} />
               </ChartCard>
 
-              <ChartCard title="Sales &amp; projected gain">
+              <ChartCard title="Sales &amp; Projected Gain">
                 <ForecastChart data={data.forecast} />
                 <div className="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-neutral-100">
                   <EstimateChip
-                    label="Est. next month revenue"
+                    label="Est. Next Month Revenue"
                     value={currency.format(data.estimatedNextMonthRevenue)}
                   />
                   <EstimateChip
-                    label="Est. next month profit"
+                    label="Est. Next Month Profit"
                     value={currency.format(data.estimatedNextMonthProfit)}
                     tone={data.estimatedNextMonthProfit >= 0 ? "positive" : "negative"}
                   />
                 </div>
               </ChartCard>
 
-              <ChartCard title="Current stock by item">
+              <ChartCard title="Current Stock by Item">
                 <StockChart data={data.stockLevels} />
               </ChartCard>
             </div>
@@ -68,25 +68,25 @@ export default async function DashboardPage() {
             {/* Right: data */}
             <div className="space-y-6">
               <div>
-                <h2 className="text-sm font-medium text-neutral-500 mb-2">
-                  General stats
+                <h2 className="text-sm font-semibold text-neutral-700 mb-2">
+                  General Stats
                 </h2>
                 <div className="grid grid-cols-2 gap-3">
                   <StatCard label="Revenue" value={currency.format(data.totalRevenue)} tone="positive" />
                   <StatCard label="Spent" value={currency.format(data.totalSpent)} tone="negative" />
                   <StatCard
-                    label="Cash profit"
+                    label="Cash Profit"
                     value={currency.format(data.cashProfit)}
                     tone={data.cashProfit >= 0 ? "positive" : "negative"}
                   />
-                  <StatCard label="Inventory value" value={currency.format(data.inventoryValue)} tone="neutral" />
+                  <StatCard label="Inventory Value" value={currency.format(data.inventoryValue)} tone="neutral" />
                 </div>
               </div>
 
               {data.restockSuggestions.length > 0 && (
                 <div className="rounded-lg border border-red-200 bg-red-50 p-4 space-y-3">
-                  <h2 className="text-sm font-medium text-red-700">
-                    Restock recommendations
+                  <h2 className="text-sm font-semibold text-red-700">
+                    Restock Recommendations
                   </h2>
                   <p className="text-xs text-neutral-500 -mt-2">
                     Rule-based on your sales pace and each item&apos;s
@@ -143,7 +143,7 @@ function ChartCard({
 }) {
   return (
     <div className="rounded-lg border border-neutral-200 bg-white shadow-sm p-4">
-      <h2 className="text-sm font-medium text-neutral-500 mb-2">{title}</h2>
+      <h2 className="text-sm font-semibold text-neutral-700 mb-2">{title}</h2>
       {children}
     </div>
   );

@@ -38,7 +38,7 @@ export default async function RestockPage({
             href="/items"
             className="text-sm text-neutral-500 hover:text-neutral-900"
           >
-            ← Back to inventory
+            ← Back to Inventory
           </Link>
           <h1 className="text-xl font-semibold mt-2">Restock {item.name}</h1>
         </div>
@@ -52,7 +52,7 @@ export default async function RestockPage({
         <form action={logPurchaseWithId} className="space-y-4">
           <div>
             <label htmlFor="quantity" className="block text-sm mb-1">
-              Quantity purchased
+              Quantity Purchased
             </label>
             <input
               id="quantity"
@@ -66,7 +66,7 @@ export default async function RestockPage({
           </div>
           <div>
             <label htmlFor="unitCost" className="block text-sm mb-1">
-              Cost per unit this time
+              Cost per Unit This Time
             </label>
             <input
               id="unitCost"
@@ -96,7 +96,7 @@ export default async function RestockPage({
             type="submit"
             className="w-full rounded-md bg-red-600 hover:bg-red-500 text-white text-sm font-medium py-2"
           >
-            Log restock
+            Log Restock
           </button>
         </form>
       </main>

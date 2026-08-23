@@ -18,9 +18,9 @@ export default async function NewItemPage({
             href="/items"
             className="text-sm text-neutral-500 hover:text-neutral-900"
           >
-            ← Back to inventory
+            ← Back to Inventory
           </Link>
-          <h1 className="text-xl font-semibold mt-2">Add an item</h1>
+          <h1 className="text-xl font-semibold mt-2">Add an Item</h1>
           <p className="text-neutral-500 text-sm mt-1">
             Set the cost and sale price once — restocking never asks for
             cost again, and logging a sale becomes a single click.
@@ -36,7 +36,7 @@ export default async function NewItemPage({
         <form action={addItem} className="space-y-4">
           <div>
             <label htmlFor="name" className="block text-sm mb-1">
-              Item name
+              Item Name
             </label>
             <input
               id="name"
@@ -49,7 +49,7 @@ export default async function NewItemPage({
           </div>
           <div>
             <label htmlFor="costPerUnit" className="block text-sm mb-1">
-              Cost per unit (what you pay the manufacturer)
+              Cost per Unit (What You Pay the Manufacturer)
             </label>
             <input
               id="costPerUnit"
@@ -64,7 +64,7 @@ export default async function NewItemPage({
           </div>
           <div>
             <label htmlFor="salePriceDefault" className="block text-sm mb-1">
-              Depop sale price
+              Depop Sale Price
             </label>
             <input
               id="salePriceDefault"
@@ -77,12 +77,12 @@ export default async function NewItemPage({
               className="w-full rounded-md bg-white border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
             />
             <p className="text-xs text-neutral-500 mt-1">
-              Used automatically every time you tap &quot;Log sale&quot;.
+              Used automatically every time you tap &quot;Log Sale&quot;.
             </p>
           </div>
           <div>
             <label htmlFor="leadTimeDays" className="block text-sm mb-1">
-              Shipping / lead time from manufacturer (days)
+              Shipping / Lead Time from Manufacturer (Days)
             </label>
             <input
               id="leadTimeDays"
@@ -102,7 +102,7 @@ export default async function NewItemPage({
             type="submit"
             className="w-full rounded-md bg-red-600 hover:bg-red-500 text-white text-sm font-medium py-2"
           >
-            Add item
+            Add Item
           </button>
         </form>
       </main>

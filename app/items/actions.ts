@@ -27,3 +27,15 @@ export async function logQuickSale(itemId: string) {
 
   redirect("/items");
 }
+
+export async function deleteItem(itemId: string) {
+  const { supabase, user } = await requireUser();
+
+  await supabase
+    .from("items")
+    .delete()
+    .eq("id", itemId)
+    .eq("user_id", user.id);
+
+  redirect("/items");
+}
