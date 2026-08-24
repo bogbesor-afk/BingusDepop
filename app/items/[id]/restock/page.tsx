@@ -9,10 +9,10 @@ export default async function RestockPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; qty?: string }>;
 }) {
   const { id } = await params;
-  const { error } = await searchParams;
+  const { error, qty } = await searchParams;
   const { supabase, user } = await requireUser();
 
   const { data: item } = await supabase
@@ -61,8 +61,15 @@ export default async function RestockPage({
               step="1"
               min="1"
               required
+              defaultValue={qty || undefined}
               className="w-full rounded-md bg-white border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
             />
+            {qty && (
+              <p className="text-xs text-neutral-500 mt-1">
+                Pre-filled from your restock recommendation — change it if
+                you want to buy a different amount.
+              </p>
+            )}
           </div>
           <div>
             <label htmlFor="unitCost" className="block text-sm mb-1">

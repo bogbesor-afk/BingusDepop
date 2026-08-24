@@ -103,9 +103,10 @@ export default async function DashboardPage() {
                   </p>
                   <div className="space-y-2">
                     {data.restockSuggestions.map((s) => (
-                      <div
+                      <Link
                         key={s.id}
-                        className="text-sm bg-white border border-neutral-200 rounded-md px-3 py-2"
+                        href={`/items/${s.id}/restock?qty=${s.suggestedQty}`}
+                        className="block text-sm bg-white border border-neutral-200 hover:border-red-300 hover:bg-red-50/40 rounded-md px-3 py-2"
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-medium">{s.name}</span>
@@ -130,7 +131,7 @@ export default async function DashboardPage() {
                             <span className="text-red-600"> · exceeds current cash profit</span>
                           )}
                         </p>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </div>
