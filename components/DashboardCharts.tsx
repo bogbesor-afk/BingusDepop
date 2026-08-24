@@ -12,7 +12,12 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import type { MonthlyPoint, StockLevel, ForecastPoint } from "@/lib/dashboard";
+import type {
+  MonthlyPoint,
+  StockLevel,
+  ForecastPoint,
+  DayOfWeekSales,
+} from "@/lib/dashboard";
 
 const gridColor = "#d4d4d4";
 const textColor = "#404040";
@@ -88,6 +93,30 @@ export function StockChart({ data }: { data: StockLevel[] }) {
         />
         <Tooltip contentStyle={tooltipStyle} />
         <Bar dataKey="stock" name="In Stock" fill={green} radius={[4, 4, 0, 0]} />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+export function DayOfWeekChart({ data }: { data: DayOfWeekSales[] }) {
+  return (
+    <ResponsiveContainer width="100%" height={180}>
+      <BarChart data={data}>
+        <CartesianGrid stroke={gridColor} strokeDasharray="3 3" />
+        <XAxis
+          dataKey="day"
+          stroke={textColor}
+          fontSize={12}
+          fontWeight={600}
+        />
+        <YAxis
+          stroke={textColor}
+          fontSize={12}
+          fontWeight={600}
+          allowDecimals={false}
+        />
+        <Tooltip contentStyle={tooltipStyle} />
+        <Bar dataKey="sales" name="Units Sold" fill={green} radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

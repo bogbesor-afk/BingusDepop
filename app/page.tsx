@@ -2,7 +2,12 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { getDashboardData } from "@/lib/dashboard";
 import { Nav } from "@/components/Nav";
-import { TrendChart, StockChart, ForecastChart } from "@/components/DashboardCharts";
+import {
+  TrendChart,
+  StockChart,
+  ForecastChart,
+  DayOfWeekChart,
+} from "@/components/DashboardCharts";
 
 const currency = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -130,6 +135,33 @@ export default async function DashboardPage() {
                   </div>
                 </div>
               )}
+
+              <div className="rounded-lg border border-neutral-200 bg-white shadow-sm p-4 space-y-3">
+                <h2 className="text-sm font-semibold text-neutral-700">
+                  Best Time to Post
+                </h2>
+                {data.postingTime.bestDay ? (
+                  <>
+                    <p className="text-xs text-neutral-500 -mt-2">
+                      Based on your own sales history, not a Depop-wide
+                      trend.
+                    </p>
+                    <p className="text-sm">
+                      You sell the most on{" "}
+                      <span className="font-semibold text-green-600">
+                        {data.postingTime.bestDay}s
+                      </span>{" "}
+                      — try posting or relisting items the day before.
+                    </p>
+                    <DayOfWeekChart data={data.postingTime.dayBreakdown} />
+                  </>
+                ) : (
+                  <p className="text-xs text-neutral-500">
+                    Log at least 5 sales and I&apos;ll show which day of the
+                    week you sell the most on.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         )}

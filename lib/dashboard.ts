@@ -27,6 +27,14 @@ export type RestockSuggestion = {
   affordable: boolean;
 };
 
+export type DayOfWeekSales = { day: string; sales: number };
+
+export type PostingTimeInsight = {
+  dayBreakdown: DayOfWeekSales[];
+  bestDay: string | null;
+  sampleSize: number;
+};
+
 export type DashboardData = {
   totalRevenue: number;
   totalSpent: number;
@@ -38,7 +46,50 @@ export type DashboardData = {
   estimatedNextMonthRevenue: number;
   estimatedNextMonthProfit: number;
   restockSuggestions: RestockSuggestion[];
+  postingTime: PostingTimeInsight;
 };
+
+const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const FULL_DAY_NAMES = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+const MIN_SALES_FOR_POSTING_INSIGHT = 5;
+
+function dayOfWeek(dateStr: string) {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day).getDay();
+}
+
+function getPostingTimeInsight(
+  saleList: { quantity: number; sold_at: string }[]
+): PostingTimeInsight {
+  const counts = new Array(7).fill(0);
+  let sampleSize = 0;
+
+  for (const s of saleList) {
+    counts[dayOfWeek(s.sold_at)] += s.quantity;
+    sampleSize += s.quantity;
+  }
+
+  const dayBreakdown: DayOfWeekSales[] = DAY_NAMES.map((day, i) => ({
+    day,
+    sales: counts[i],
+  }));
+
+  let bestDay: string | null = null;
+  if (sampleSize >= MIN_SALES_FOR_POSTING_INSIGHT) {
+    const bestIndex = counts.indexOf(Math.max(...counts));
+    bestDay = FULL_DAY_NAMES[bestIndex];
+  }
+
+  return { dayBreakdown, bestDay, sampleSize };
+}
 
 function monthLabel(dateStr: string) {
   const [year, month] = dateStr.split("-").map(Number);
@@ -213,6 +264,8 @@ export async function getDashboardData(
     .map(({ _shouldReorder, ...rest }) => rest)
     .sort((a, b) => a.daysLeft - b.daysLeft);
 
+  const postingTime = getPostingTimeInsight(saleList);
+
   return {
     totalRevenue,
     totalSpent,
@@ -224,5 +277,6 @@ export async function getDashboardData(
     estimatedNextMonthRevenue,
     estimatedNextMonthProfit,
     restockSuggestions,
+    postingTime,
   };
 }
