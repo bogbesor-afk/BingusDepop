@@ -31,11 +31,25 @@ export async function logQuickSale(itemId: string) {
 export async function deleteItem(itemId: string) {
   const { supabase, user } = await requireUser();
 
+  const { data: item } = await supabase
+    .from("items")
+    .select("image_url")
+    .eq("id", itemId)
+    .eq("user_id", user.id)
+    .single();
+
   await supabase
     .from("items")
     .delete()
     .eq("id", itemId)
     .eq("user_id", user.id);
+
+  if (item?.image_url) {
+    const path = item.image_url.split("/item-photos/")[1];
+    if (path) {
+      await supabase.storage.from("item-photos").remove([path]);
+    }
+  }
 
   redirect("/items");
 }

@@ -16,8 +16,8 @@ import type { MonthlyPoint, StockLevel, ForecastPoint } from "@/lib/dashboard";
 
 const gridColor = "#d4d4d4";
 const textColor = "#404040";
-const sage = "#8A9A5B";
-const darkGreen = "#3B4A3B";
+const green = "#16a34a";
+const red = "#dc2626";
 
 const tooltipStyle = {
   background: "#ffffff",
@@ -48,7 +48,7 @@ export function TrendChart({ data }: { data: MonthlyPoint[] }) {
           type="monotone"
           dataKey="revenue"
           name="Revenue"
-          stroke={sage}
+          stroke={green}
           strokeWidth={2.5}
           dot={false}
         />
@@ -56,7 +56,7 @@ export function TrendChart({ data }: { data: MonthlyPoint[] }) {
           type="monotone"
           dataKey="spent"
           name="Spent on Stock"
-          stroke={darkGreen}
+          stroke={red}
           strokeWidth={2.5}
           dot={false}
         />
@@ -87,7 +87,7 @@ export function StockChart({ data }: { data: StockLevel[] }) {
           allowDecimals={false}
         />
         <Tooltip contentStyle={tooltipStyle} />
-        <Bar dataKey="stock" name="In Stock" fill={sage} radius={[4, 4, 0, 0]} />
+        <Bar dataKey="stock" name="In Stock" fill={green} radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -111,7 +111,7 @@ export function ForecastChart({ data }: { data: ForecastPoint[] }) {
           type="monotone"
           dataKey="revenue"
           name="Revenue"
-          stroke={sage}
+          stroke={textColor}
           strokeWidth={2.5}
           dot={{ r: 3 }}
           connectNulls
@@ -120,7 +120,7 @@ export function ForecastChart({ data }: { data: ForecastPoint[] }) {
           type="monotone"
           dataKey="profit"
           name="Cash Profit"
-          stroke={darkGreen}
+          stroke={green}
           strokeWidth={2.5}
           dot={{ r: 3 }}
           connectNulls
@@ -129,7 +129,7 @@ export function ForecastChart({ data }: { data: ForecastPoint[] }) {
           type="monotone"
           dataKey="projectedProfit"
           name="Projected Profit"
-          stroke={darkGreen}
+          stroke={green}
           strokeWidth={2.5}
           strokeDasharray="5 5"
           strokeOpacity={0.6}

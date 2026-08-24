@@ -79,7 +79,11 @@ export default async function DashboardPage() {
                     value={currency.format(data.cashProfit)}
                     tone={data.cashProfit >= 0 ? "positive" : "negative"}
                   />
-                  <StatCard label="Inventory Value" value={currency.format(data.inventoryValue)} tone="neutral" />
+                  <StatCard
+                    label="Inventory Value"
+                    value={currency.format(data.inventoryValue)}
+                    tone={data.inventoryValue >= 0 ? "positive" : "negative"}
+                  />
                 </div>
               </div>
 
@@ -160,9 +164,9 @@ function EstimateChip({
 }) {
   const toneClass =
     tone === "positive"
-      ? "text-[#8A9A5B]"
+      ? "text-green-600"
       : tone === "negative"
-      ? "text-[#3B4A3B]"
+      ? "text-red-600"
       : "text-neutral-900";
 
   return (
@@ -184,9 +188,9 @@ function StatCard({
 }) {
   const toneClass =
     tone === "positive"
-      ? "text-[#8A9A5B]"
+      ? "text-green-600"
       : tone === "negative"
-      ? "text-[#3B4A3B]"
+      ? "text-red-600"
       : "text-neutral-900";
 
   return (

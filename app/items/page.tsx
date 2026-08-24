@@ -38,49 +38,69 @@ export default async function ItemsPage() {
             {items.map((item) => (
               <div
                 key={item.id}
-                className="rounded-lg border border-neutral-200 bg-white shadow-sm p-4 space-y-3"
+                className="rounded-lg border border-neutral-200 bg-white shadow-sm overflow-hidden"
               >
-                <div className="flex items-start justify-between gap-2">
+                <div className="relative aspect-square bg-neutral-100">
+                  {item.image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={item.image_url}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-neutral-300 text-xs">
+                      No Photo
+                    </div>
+                  )}
+                  <form
+                    action={deleteItem.bind(null, item.id)}
+                    className="absolute top-2 right-2 rounded-full bg-white/90 shadow-sm"
+                  >
+                    <DeleteItemButton itemName={item.name} />
+                  </form>
+                  {item.sale_price_default != null && (
+                    <span className="absolute bottom-2 left-2 rounded-md bg-white/90 text-neutral-900 text-xs font-semibold px-2 py-1">
+                      {currency.format(item.sale_price_default)}
+                    </span>
+                  )}
+                </div>
+                <div className="p-4 space-y-3">
                   <div>
                     <h2 className="font-medium">{item.name}</h2>
                     <p className="text-xs text-neutral-500 mt-0.5">
                       Cost {currency.format(item.cost_per_unit)} / unit
-                      {item.sale_price_default != null &&
-                        ` · Sells for ${currency.format(item.sale_price_default)}`}
                     </p>
                   </div>
-                  <form action={deleteItem.bind(null, item.id)}>
-                    <DeleteItemButton itemName={item.name} />
-                  </form>
-                </div>
-                <div className="flex items-baseline gap-2">
-                  <span
-                    className={`text-2xl font-semibold ${
-                      item.stock <= 0 ? "text-[#3B4A3B]" : "text-neutral-900"
-                    }`}
-                  >
-                    {item.stock}
-                  </span>
-                  <span className="text-xs text-neutral-500">In Stock</span>
-                </div>
-                <div className="flex gap-2 pt-1">
-                  <Link
-                    href={`/items/${item.id}/restock`}
-                    className="flex-1 text-center rounded-md bg-neutral-100 hover:bg-neutral-200 text-neutral-900 text-xs font-medium py-1.5"
-                  >
-                    Restock
-                  </Link>
-                  <form
-                    action={logQuickSale.bind(null, item.id)}
-                    className="flex-1"
-                  >
-                    <button
-                      type="submit"
-                      className="w-full rounded-md bg-red-600 hover:bg-red-500 text-white text-xs font-medium py-1.5"
+                  <div className="flex items-baseline gap-2">
+                    <span
+                      className={`text-2xl font-semibold ${
+                        item.stock < 0 ? "text-red-600" : "text-neutral-900"
+                      }`}
                     >
-                      Log Sale (+1)
-                    </button>
-                  </form>
+                      {item.stock}
+                    </span>
+                    <span className="text-xs text-neutral-500">In Stock</span>
+                  </div>
+                  <div className="flex gap-2 pt-1">
+                    <Link
+                      href={`/items/${item.id}/restock`}
+                      className="flex-1 text-center rounded-md bg-neutral-100 hover:bg-neutral-200 text-neutral-900 text-xs font-medium py-1.5"
+                    >
+                      Restock
+                    </Link>
+                    <form
+                      action={logQuickSale.bind(null, item.id)}
+                      className="flex-1"
+                    >
+                      <button
+                        type="submit"
+                        className="w-full rounded-md bg-red-600 hover:bg-red-500 text-white text-xs font-medium py-1.5"
+                      >
+                        Log Sale (+1)
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </div>
             ))}

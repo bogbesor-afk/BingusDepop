@@ -35,6 +35,21 @@ export default async function NewItemPage({
 
         <form action={addItem} className="space-y-4">
           <div>
+            <label htmlFor="photo" className="block text-sm mb-1">
+              Photo (Optional)
+            </label>
+            <input
+              id="photo"
+              name="photo"
+              type="file"
+              accept="image/*"
+              className="w-full text-sm text-neutral-600 file:mr-3 file:rounded-md file:border-0 file:bg-neutral-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-neutral-900 hover:file:bg-neutral-200"
+            />
+            <p className="text-xs text-neutral-500 mt-1">
+              Shown on your inventory card, like a Depop listing photo.
+            </p>
+          </div>
+          <div>
             <label htmlFor="name" className="block text-sm mb-1">
               Item Name
             </label>

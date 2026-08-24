@@ -5,6 +5,7 @@ export type ItemStock = {
   name: string;
   cost_per_unit: number;
   sale_price_default: number | null;
+  image_url: string | null;
   purchased: number;
   sold: number;
   stock: number;
@@ -20,7 +21,7 @@ export async function getItemsWithStock(
     await Promise.all([
       supabase
         .from("items")
-        .select("id, name, cost_per_unit, sale_price_default")
+        .select("id, name, cost_per_unit, sale_price_default, image_url")
         .eq("user_id", userId)
         .order("name"),
       supabase
@@ -58,6 +59,7 @@ export async function getItemsWithStock(
         item.sale_price_default != null
           ? Number(item.sale_price_default)
           : null,
+      image_url: item.image_url ?? null,
       purchased,
       sold,
       stock: purchased - sold,
